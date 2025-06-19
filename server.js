@@ -14,14 +14,14 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // MongoDB connection
-mongoose.connect(process.env.MONGO_URI || process.env.MONGO_URL, {
+console.log("🔍 Connexion Mongo à :", process.env.MONGO_URI);
+mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true
-}).then(() => {
-  console.log("✅ Connecté à MongoDB");
-}).catch((err) => {
-  console.error("❌ Erreur de connexion MongoDB:", err);
-});
+})
+.then(() => console.log("✅ Connecté à MongoDB"))
+.catch((err) => console.error("❌ Erreur de connexion MongoDB:", err));
+
 
 // MODELE UTILISATEUR
 const userSchema = new mongoose.Schema({
