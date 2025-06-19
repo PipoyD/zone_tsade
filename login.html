@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <link rel="preload" as="image" href="fond_site.png">
+  <meta charset="UTF-8">
+  <title>Connexion - Zone TSADE</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .page-enter {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    .page-enter-active {
+      opacity: 1;
+      transform: translateY(0);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+    .page-exit {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .page-exit-active {
+      opacity: 0;
+      transform: translateY(-30px);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+  </style>
+</head>
+<body>
+  <div class="background"></div>
+  <div class="background-overlay"></div>
+
+  <div class="card">
+    <h1>Connexion</h1>
+    <p class="subtitle">Veuillez entrer vos identifiants pour accéder à la Zone TSADE</p>
+
+    <form id="login-form">
+      <input type="text" id="username" placeholder="Identifiant" required>
+      <div class="password-wrapper">
+        <input type="password" id="password" placeholder="Mot de passe" required>
+        <button type="button" class="toggle-password" onclick="togglePassword()">👁️</button>
+      </div>
+      <div class="actions">
+        <button type="submit" class="btn continue">Se connecter</button>
+        <button type="button" class="btn back" onclick="transitionTo('register.html')">Demander l’accès</button>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    // Animation entrée
+    document.addEventListener("DOMContentLoaded", () => {
+      const card = document.querySelector(".card");
+      card.classList.add("page-enter");
+      requestAnimationFrame(() => {
+        card.classList.add("page-enter-active");
+      });
+    });
+
+    // Transition de page
+    function transitionTo(url) {
+      const card = document.querySelector(".card");
+      card.classList.remove("page-enter", "page-enter-active");
+      card.classList.add("page-exit");
+      requestAnimationFrame(() => {
+        card.classList.add("page-exit-active");
+      });
+      setTimeout(() => {
+        window.location.href = url;
+      }, 400);
+    }
+
+    // Fond dynamique
+    let targetX = 50, targetY = 50, currentX = 50, currentY = 50;
+    const bg = document.querySelector('.background');
+    document.addEventListener("mousemove", function(e) {
+      targetX = 50 + (e.clientX / window.innerWidth - 0.5) * 10;
+      targetY = 50 + (e.clientY / window.innerHeight - 0.5) * 5;
+    });
+    function animateBackground() {
+      currentX += (targetX - currentX) * 0.05;
+      currentY += (targetY - currentY) * 0.05;
+      bg.style.backgroundPosition = `${currentX}% ${currentY}%`;
+      requestAnimationFrame(animateBackground);
+    }
+    animateBackground();
+
+    // Afficher/Masquer le mot de passe
+    function togglePassword() {
+      const input = document.getElementById("password");
+      input.type = input.type === "password" ? "text" : "password";
+    }
+
+    // Validation
+    document.getElementById("login-form").addEventListener("submit", function(e) {
+      const inputs = this.querySelectorAll('input');
+      let valid = true;
+
+      inputs.forEach(input => {
+        if (!input.value.trim()) {
+          input.classList.add('invalid');
+          valid = false;
+          setTimeout(() => input.classList.remove('invalid'), 1500);
+          input.addEventListener('focus', () => input.classList.remove('invalid'), { once: true });
+        }
+      });
+
+      if (!valid) e.preventDefault();
+    });
+  </script>
+</body>
+</html>
