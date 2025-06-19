@@ -23,11 +23,11 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  background:
-    url("fond_site.png") no-repeat center center fixed;
-  background-size: cover;
-  z-index: 0;
+  background: url("fond_site.png") no-repeat center center;
+  background-size: 110%;
+  z-index: -2;
 }
+
 
 .background-overlay {
   position: fixed;
@@ -354,4 +354,26 @@ input.invalid {
     flex-direction: column;
     gap: 0.75rem;
   }
+}
+
+.page-enter {
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+.page-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.page-exit {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.page-exit-active {
+  opacity: 0;
+  transform: translateY(-30px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
 }
