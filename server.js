@@ -4,7 +4,7 @@ const dotenv = require('dotenv');
 const path = require('path');
 const bcrypt = require('bcrypt');
 
-dotenv.config();
+require('dotenv').config();
 const app = express();
 const port = process.env.PORT || 8080;
 
