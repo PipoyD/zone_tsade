@@ -1,17 +1,17 @@
 const express = require('express');
 const path = require('path');
 const app = express();
-const port = process.env.PORT || 8080; // important pour Railway
+const port = process.env.PORT || 8080;
 
-// Sert tous les fichiers statiques dans le dossier "public"
-app.use(express.static(path.join(__dirname, 'public')));
+// Sert tous les fichiers statiques du dossier courant
+app.use(express.static(__dirname));
 
-// Redirige la racine vers register.html
+// Route par défaut : envoie register.html
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'register.html'));
+  res.sendFile(path.join(__dirname, 'register.html'));
 });
 
-// Lance le serveur
+// Démarre le serveur
 app.listen(port, () => {
   console.log(`✅ Serveur lancé sur http://localhost:${port}`);
 });
