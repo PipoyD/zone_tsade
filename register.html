@@ -53,8 +53,8 @@
           </div>
         </div>
         <form id="form-step1">
-          <input type="text" placeholder="Nom complet" required>
-          <input type="text" placeholder="Identifiant" required>
+          <input type="text" placeholder="Nom complet" required minlength="5">
+          <input type="text" placeholder="Identifiant" required minlength="8">
           <div class="actions">
             <button type="button" class="btn continue" onclick="goToStep2()">Étape suivante</button>
             <button type="button" class="btn back" onclick="transitionTo('login.html')">Connexion</button>
@@ -68,7 +68,7 @@
         <p class="subtitle">Saisissez votre mot de passe et choisissez votre département.</p>
         <form action="#" method="post">
           <div class="password-wrapper">
-            <input type="password" placeholder="Mot de passe" id="password" required>
+            <input type="password" placeholder="Mot de passe" id="password" required minlength="8">
             <button type="button" class="toggle-password" onclick="togglePassword()">👁️</button>
           </div>
           <div class="custom-select-wrapper">
@@ -92,7 +92,7 @@
   </div>
 
   <script>
-    // Effet fond dynamique
+    // Fond dynamique
     let targetX = 50, targetY = 50, currentX = 50, currentY = 50;
     document.addEventListener("mousemove", function(e) {
       targetX = 50 + (e.clientX / window.innerWidth - 0.5) * 20;
@@ -106,7 +106,7 @@
     }
     animateBackground();
 
-    // Transitions entrée/sortie page
+    // Transition
     document.addEventListener("DOMContentLoaded", () => {
       const card = document.querySelector(".card");
       card.classList.add("page-enter");
@@ -127,14 +127,13 @@
       }, 400);
     }
 
-    // Étapes
     function goToStep2() {
       const form = document.querySelector('#form-step1');
       const inputs = form.querySelectorAll('input[type="text"]');
       let allValid = true;
 
       inputs.forEach(input => {
-        if (!input.value.trim()) {
+        if (!input.value.trim() || input.value.length < 8) {
           input.classList.add('invalid');
           allValid = false;
           setTimeout(() => input.classList.remove('invalid'), 1500);
@@ -143,6 +142,7 @@
       });
 
       if (!allValid) return;
+
       document.querySelector('.step1').classList.remove('active');
       document.querySelector('.step2').classList.add('active');
       document.querySelector('.step1-bar').classList.remove('active');
