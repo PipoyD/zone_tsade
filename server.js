@@ -14,15 +14,15 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // MongoDB connection
-const mongoUri = process.env.MONGO_URI || process.env.MONGO_URL || '';
-console.log("🔍 Connexion Mongo à :", mongoUri);
+const mongoUri = process.env.MONGODB_URI || process.env.MONGO_URL || '';
+console.log("🔍 Connexion Mongo à :", process.env.MONGODB_URI);
 
 if (!mongoUri) {
-  console.error("❌ Aucune URI MongoDB définie ! Vérifie la variable MONGO_URI ou MONGO_URL dans Railway.");
+  console.error("❌ Aucune URI MongoDB définie ! Vérifie la variable MONGODB_URI ou MONGO_URL dans Railway.");
   process.exit(1);
 }
 
-mongoose.connect(mongoUri, {
+mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true
 })
