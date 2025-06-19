@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <link rel="preload" as="image" href="fond_site.png">
+  <meta charset="UTF-8">
+  <title>Dashboard - Zone TSADE</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .dashboard-container {
+      max-width: 800px;
+      width: 100%;
+      margin: 0 auto;
+      text-align: center;
+      padding: 2rem;
+    }
+
+    .dashboard-container h1 {
+      font-size: 1.8rem;
+      color: #fff;
+      margin-bottom: 1rem;
+    }
+
+    .dashboard-container p {
+      color: #ccc;
+      font-size: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .dashboard-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .dashboard-actions .btn {
+      width: 200px;
+    }
+  </style>
+</head>
+<body>
+  <div class="background"></div>
+  <div class="background-overlay"></div>
+
+  <div class="card dashboard-container">
+    <h1>Bienvenue dans la Zone TSADE</h1>
+    <p>Vous êtes connecté. Choisissez une action pour commencer :</p>
+    <div class="dashboard-actions">
+      <button class="btn continue">Accéder à mon profil</button>
+      <button class="btn back">Déconnexion</button>
+    </div>
+  </div>
+
+  <script>
+    let targetX = 50, targetY = 50, currentX = 50, currentY = 50;
+    const bg = document.querySelector('.background');
+    document.addEventListener("mousemove", function(e) {
+      targetX = 50 + (e.clientX / window.innerWidth - 0.5) * 10;
+      targetY = 50 + (e.clientY / window.innerHeight - 0.5) * 5;
+    });
+    function animateBackground() {
+      currentX += (targetX - currentX) * 0.05;
+      currentY += (targetY - currentY) * 0.05;
+      bg.style.backgroundPosition = `${currentX}% ${currentY}%`;
+      requestAnimationFrame(animateBackground);
+    }
+    animateBackground();
+  </script>
+</body>
+</html>
