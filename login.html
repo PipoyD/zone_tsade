@@ -35,10 +35,10 @@
     <h1>Connexion</h1>
     <p class="subtitle">Veuillez entrer vos identifiants pour accéder à la Zone TSADE</p>
 
-    <form id="login-form">
-      <input type="text" id="username" placeholder="Identifiant" required>
+    <form id="login-form" method="POST" action="/login">
+      <input type="text" name="username" placeholder="Identifiant" required>
       <div class="password-wrapper">
-        <input type="password" id="password" placeholder="Mot de passe" required>
+        <input type="password" name="password" placeholder="Mot de passe" required>
         <button type="button" class="toggle-password" onclick="togglePassword()">👁️</button>
       </div>
       <div class="actions">
@@ -88,26 +88,9 @@
 
     // Afficher/Masquer le mot de passe
     function togglePassword() {
-      const input = document.getElementById("password");
+      const input = document.querySelector("input[name='password']");
       input.type = input.type === "password" ? "text" : "password";
     }
-
-    // Validation
-    document.getElementById("login-form").addEventListener("submit", function(e) {
-      const inputs = this.querySelectorAll('input');
-      let valid = true;
-
-      inputs.forEach(input => {
-        if (!input.value.trim()) {
-          input.classList.add('invalid');
-          valid = false;
-          setTimeout(() => input.classList.remove('invalid'), 1500);
-          input.addEventListener('focus', () => input.classList.remove('invalid'), { once: true });
-        }
-      });
-
-      if (!valid) e.preventDefault();
-    });
   </script>
 </body>
 </html>
