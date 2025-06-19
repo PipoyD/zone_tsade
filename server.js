@@ -20,8 +20,8 @@ app.use(session({
 }));
 
 // MongoDB connection
-console.log("🔍 URI de connexion Mongo :", process.env.MONGO_URI);
-mongoose.connect(process.env.MONGO_URI, {
+console.log("🔍 URI de connexion Mongo :", process.env.MONGODB_URI);
+mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true
 }).then(() => console.log("✅ Connecté à MongoDB"))
