@@ -72,3 +72,33 @@ app.post('/login', async (req, res) => {
 app.listen(port, () => {
   console.log(`🚀 Serveur actif sur http://localhost:${port}`);
 });
+
+const bcrypt = require('bcrypt');
+
+// Vérifie s'il y a déjà un admin
+async function checkAdminExists() {
+  const count = await User.countDocuments();
+  return count > 0;
+}
+
+// ROUTE GET SETUP
+app.get('/setup', async (req, res) => {
+  if (await checkAdminExists()) {
+    return res.redirect('/login.html'); // Empêche l'accès si un user existe
+  }
+  res.sendFile(path.join(__dirname, 'setup.html'));
+});
+
+// ROUTE POST SETUP
+app.post('/setup', async (req, res) => {
+  const { username, password } = req.body;
+  if (await checkAdminExists()) {
+    return res.status(403).send("Administrateur déjà créé");
+  }
+
+  const hashed = await bcrypt.hash(password, 10);
+  const admin = new User({ username, password: hashed });
+  await admin.save();
+  console.log("✅ Administrateur créé");
+  res.redirect('/login.html');
+});
