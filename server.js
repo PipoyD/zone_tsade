@@ -4,7 +4,7 @@ const dotenv = require('dotenv');
 const path = require('path');
 const bcrypt = require('bcrypt');
 
-require('dotenv').config();
+dotenv.config();
 const app = express();
 const port = process.env.PORT || 8080;
 
@@ -14,14 +14,20 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // MongoDB connection
-console.log("🔍 Connexion Mongo à :", process.env.MONGO_URI);
-mongoose.connect(process.env.MONGO_URI, {
+const mongoUri = process.env.MONGO_URI || process.env.MONGO_URL || '';
+console.log("🔍 Connexion Mongo à :", mongoUri);
+
+if (!mongoUri) {
+  console.error("❌ Aucune URI MongoDB définie ! Vérifie la variable MONGO_URI ou MONGO_URL dans Railway.");
+  process.exit(1);
+}
+
+mongoose.connect(mongoUri, {
   useNewUrlParser: true,
   useUnifiedTopology: true
 })
 .then(() => console.log("✅ Connecté à MongoDB"))
 .catch((err) => console.error("❌ Erreur de connexion MongoDB:", err));
-
 
 // MODELE UTILISATEUR
 const userSchema = new mongoose.Schema({
@@ -34,9 +40,11 @@ const User = mongoose.model('User', userSchema);
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'register.html'));
 });
+
 app.get('/login', (req, res) => {
   res.sendFile(path.join(__dirname, 'login.html'));
 });
+
 app.get('/dashboard', (req, res) => {
   res.sendFile(path.join(__dirname, 'dashboard.html'));
 });
@@ -68,19 +76,13 @@ app.post('/login', async (req, res) => {
   res.redirect('/dashboard');
 });
 
-// LANCEMENT DU SERVEUR
-app.listen(port, () => {
-  console.log(`🚀 Serveur actif sur http://localhost:${port}`);
-});
-
-// Affiche la page d'installation si aucun utilisateur n'existe
+// SETUP INITIAL ADMIN
 app.get('/setup', async (req, res) => {
   const alreadyExists = await User.findOne({});
   if (alreadyExists) return res.redirect('/login');
   res.sendFile(path.join(__dirname, 'setup.html'));
 });
 
-// Crée un utilisateur admin (uniquement si aucun utilisateur en base)
 app.post('/setup', async (req, res) => {
   const { username, password } = req.body;
 
@@ -93,3 +95,7 @@ app.post('/setup', async (req, res) => {
   res.redirect('/login.html');
 });
 
+// START SERVER
+app.listen(port, () => {
+  console.log(`🚀 Serveur actif sur http://localhost:${port}`);
+});
