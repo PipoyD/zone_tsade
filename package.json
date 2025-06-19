@@ -1,0 +1,4 @@
+"scripts": {
+  "start": "vite preview",
+  "build": "vite build"
+}
