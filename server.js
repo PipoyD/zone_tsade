@@ -72,3 +72,24 @@ app.post('/login', async (req, res) => {
 app.listen(port, () => {
   console.log(`🚀 Serveur actif sur http://localhost:${port}`);
 });
+
+// Affiche la page d'installation si aucun utilisateur n'existe
+app.get('/setup', async (req, res) => {
+  const alreadyExists = await User.findOne({});
+  if (alreadyExists) return res.redirect('/login');
+  res.sendFile(path.join(__dirname, 'setup.html'));
+});
+
+// Crée un utilisateur admin (uniquement si aucun utilisateur en base)
+app.post('/setup', async (req, res) => {
+  const { username, password } = req.body;
+
+  const alreadyExists = await User.findOne({});
+  if (alreadyExists) return res.status(403).send("⚠️ Admin déjà créé");
+
+  const hashedPassword = await bcrypt.hash(password, 10);
+  await new User({ username, password: hashedPassword }).save();
+
+  res.redirect('/login.html');
+});
+
