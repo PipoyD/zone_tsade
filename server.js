@@ -1,61 +1,77 @@
 const express = require('express');
-const path = require('path');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
-const bcrypt = require('bcryptjs');
-const cors = require('cors');
+const path = require('path');
 
+// Load environment variables
 dotenv.config();
+
+// Initialize app
 const app = express();
 const port = process.env.PORT || 8080;
 
-// Middlewares
+// Middleware
 app.use(express.static(__dirname));
 app.use(express.json());
-app.use(cors());
+app.use(express.urlencoded({ extended: true }));
 
-// MongoDB
-mongoose.connect(process.env.MONGODB_URI)
-  .then(() => console.log("✅ Connexion à MongoDB réussie"))
-  .catch(err => console.error("❌ Erreur MongoDB :", err));
+// MongoDB connection
+mongoose.connect(process.env.MONGO_URL, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+}).then(() => {
+  console.log("✅ Connecté à MongoDB");
+}).catch((err) => {
+  console.error("❌ Erreur de connexion MongoDB:", err);
+});
 
 // MODELE UTILISATEUR
-const User = mongoose.model('User', new mongoose.Schema({
-  username: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-  role: { type: String, enum: ['admin', 'user'], default: 'user' }
-}));
+const userSchema = new mongoose.Schema({
+  username: String,
+  password: String
+});
 
-// Route principale
+const User = mongoose.model('User', userSchema);
+
+// ROUTES
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'register.html'));
 });
 
-// Route de login
-app.post('/api/login', async (req, res) => {
-  const { username, password } = req.body;
-  const user = await User.findOne({ username });
-  if (!user) return res.status(400).json({ message: "Identifiant incorrect" });
-
-  const valid = await bcrypt.compare(password, user.password);
-  if (!valid) return res.status(400).json({ message: "Mot de passe incorrect" });
-
-  res.json({ success: true, role: user.role });
+app.get('/login', (req, res) => {
+  res.sendFile(path.join(__dirname, 'login.html'));
 });
 
-// Route pour créer un admin (exécuter UNE fois)
-app.post('/api/create-admin', async (req, res) => {
+app.get('/dashboard', (req, res) => {
+  res.sendFile(path.join(__dirname, 'dashboard.html'));
+});
+
+// ENREGISTREMENT
+app.post('/register', async (req, res) => {
   const { username, password } = req.body;
-  const hash = await bcrypt.hash(password, 10);
-  try {
-    const user = await User.create({ username, password: hash, role: 'admin' });
-    res.json({ message: "Admin créé", user });
-  } catch (err) {
-    res.status(500).json({ error: "Erreur lors de la création", details: err.message });
+  if (!username || !password) return res.status(400).send("Champs requis");
+
+  const userExists = await User.findOne({ username });
+  if (userExists) return res.status(409).send("Utilisateur existant");
+
+  const newUser = new User({ username, password });
+  await newUser.save();
+  res.status(201).send("Utilisateur enregistré");
+});
+
+// CONNEXION
+app.post('/login', async (req, res) => {
+  const { username, password } = req.body;
+  const user = await User.findOne({ username, password });
+
+  if (!user) {
+    return res.status(401).send("Identifiants invalides");
   }
+
+  res.redirect('/dashboard');
 });
 
-// Démarrage
+// LANCEMENT DU SERVEUR
 app.listen(port, () => {
-  console.log(`🚀 Serveur lancé sur http://localhost:${port}`);
+  console.log(`🚀 Serveur actif sur http://localhost:${port}`);
 });
