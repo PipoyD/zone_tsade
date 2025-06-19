@@ -1,14 +1,30 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
+  <link rel="preload" as="image" href="fond_site.png">
   <meta charset="UTF-8">
   <title>Installation Admin</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css">
+  <style>
+    .page-enter {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    .page-enter-active {
+      opacity: 1;
+      transform: translateY(0);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+  </style>
 </head>
 <body>
-  <div class="card">
+  <div class="background"></div>
+  <div class="background-overlay"></div>
+
+  <div class="card page-enter">
     <h1>Créer l'administrateur</h1>
+    <p class="subtitle">Cette étape ne sera possible qu'une seule fois.</p>
     <form action="/setup" method="POST">
       <input type="text" name="username" placeholder="Nom d'utilisateur" required>
       <input type="password" name="password" placeholder="Mot de passe" required>
@@ -17,5 +33,32 @@
       </div>
     </form>
   </div>
+
+  <script>
+    // Animation d'entrée
+    document.addEventListener("DOMContentLoaded", () => {
+      const card = document.querySelector(".card");
+      requestAnimationFrame(() => {
+        card.classList.add("page-enter-active");
+      });
+    });
+
+    // Fond animé comme login/register
+    let targetX = 50, targetY = 50, currentX = 50, currentY = 50;
+    const bg = document.querySelector('.background');
+
+    document.addEventListener("mousemove", function(e) {
+      targetX = 50 + (e.clientX / window.innerWidth - 0.5) * 10;
+      targetY = 50 + (e.clientY / window.innerHeight - 0.5) * 5;
+    });
+
+    function animateBackground() {
+      currentX += (targetX - currentX) * 0.05;
+      currentY += (targetY - currentY) * 0.05;
+      bg.style.backgroundPosition = `${currentX}% ${currentY}%`;
+      requestAnimationFrame(animateBackground);
+    }
+    animateBackground();
+  </script>
 </body>
 </html>
