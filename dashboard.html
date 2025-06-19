@@ -48,11 +48,12 @@
     <p>Vous êtes connecté. Choisissez une action pour commencer :</p>
     <div class="dashboard-actions">
       <button class="btn continue">Accéder à mon profil</button>
-      <button class="btn back">Déconnexion</button>
+      <button class="btn back" onclick="logout()">Déconnexion</button>
     </div>
   </div>
 
   <script>
+    // Animation fond
     let targetX = 50, targetY = 50, currentX = 50, currentY = 50;
     const bg = document.querySelector('.background');
     document.addEventListener("mousemove", function(e) {
@@ -66,6 +67,18 @@
       requestAnimationFrame(animateBackground);
     }
     animateBackground();
+
+    // Déconnexion utilisateur
+    function logout() {
+      fetch('/logout')
+        .then(() => {
+          window.location.href = '/login';
+        })
+        .catch(err => {
+          alert("Erreur de déconnexion !");
+          console.error(err);
+        });
+    }
   </script>
 </body>
 </html>
