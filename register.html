@@ -1,14 +1,36 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
+  <link rel="preload" as="image" href="fond_site.png">
   <meta charset="UTF-8">
   <title>Zone TSADE - Création de Profil</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css">
+  <style>
+    .page-enter {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    .page-enter-active {
+      opacity: 1;
+      transform: translateY(0);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+    .page-exit {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .page-exit-active {
+      opacity: 0;
+      transform: translateY(-30px);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+  </style>
 </head>
 <body>
-  <div class="background"></div>
+  <div class="background" id="animated-background"></div>
   <div class="background-overlay"></div>
+
   <div class="card">
     <div class="top-bar">
       <div class="progress">
@@ -35,7 +57,7 @@
           <input type="text" placeholder="Identifiant" required>
           <div class="actions">
             <button type="button" class="btn continue" onclick="goToStep2()">Étape suivante</button>
-            <button type="button" class="btn back" onclick="window.location.href='login.html'">Connexion</button>
+            <button type="button" class="btn back" onclick="transitionTo('login.html')">Connexion</button>
           </div>
         </form>
       </div>
@@ -70,21 +92,42 @@
   </div>
 
   <script>
-    // Effet visuel du background
+    // Effet fond dynamique
     let targetX = 50, targetY = 50, currentX = 50, currentY = 50;
     document.addEventListener("mousemove", function(e) {
       targetX = 50 + (e.clientX / window.innerWidth - 0.5) * 20;
-      targetY = 50 + (e.clientY / window.innerHeight - 0.5) * 10;
+      targetY = 50 + (e.clientY / window.innerHeight - 0.5) * 5;
     });
     function animateBackground() {
       currentX += (targetX - currentX) * 0.05;
       currentY += (targetY - currentY) * 0.05;
-      document.body.style.backgroundPosition = `${currentX}% ${currentY}%`;
+      document.getElementById("animated-background").style.backgroundPosition = `${currentX}% ${currentY}%`;
       requestAnimationFrame(animateBackground);
     }
     animateBackground();
 
-    // Navigation étapes
+    // Transitions entrée/sortie page
+    document.addEventListener("DOMContentLoaded", () => {
+      const card = document.querySelector(".card");
+      card.classList.add("page-enter");
+      requestAnimationFrame(() => {
+        card.classList.add("page-enter-active");
+      });
+    });
+
+    function transitionTo(url) {
+      const card = document.querySelector(".card");
+      card.classList.remove("page-enter", "page-enter-active");
+      card.classList.add("page-exit");
+      requestAnimationFrame(() => {
+        card.classList.add("page-exit-active");
+      });
+      setTimeout(() => {
+        window.location.href = url;
+      }, 400);
+    }
+
+    // Étapes
     function goToStep2() {
       const form = document.querySelector('#form-step1');
       const inputs = form.querySelectorAll('input[type="text"]');
@@ -100,7 +143,6 @@
       });
 
       if (!allValid) return;
-
       document.querySelector('.step1').classList.remove('active');
       document.querySelector('.step2').classList.add('active');
       document.querySelector('.step1-bar').classList.remove('active');
@@ -114,13 +156,12 @@
       document.querySelector('.step1-bar').classList.add('active');
     }
 
-    // Affichage/Masquage mot de passe
     function togglePassword() {
       const input = document.getElementById("password");
       input.type = input.type === "password" ? "text" : "password";
     }
 
-    // Select personnalisé
+    // Custom select
     const trigger = document.querySelector(".custom-select-trigger");
     const options = document.querySelector(".custom-options");
     const allOptions = document.querySelectorAll(".custom-option");
