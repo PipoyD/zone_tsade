@@ -75,3 +75,13 @@ app.post('/login', async (req, res) => {
 app.listen(port, () => {
   console.log(`🚀 Serveur actif sur http://localhost:${port}`);
 });
+
+app.post('/login', async (req, res) => {
+  const { username, password } = req.body;
+  const user = await User.findOne({ username });
+  if (user && await bcrypt.compare(password, user.password)) {
+    res.redirect('/dashboard.html'); // ✅ Redirection après succès
+  } else {
+    res.status(401).send('Identifiants invalides');
+  }
+});
