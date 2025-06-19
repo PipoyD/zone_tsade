@@ -2,11 +2,9 @@ const express = require('express');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const path = require('path');
+const bcrypt = require('bcrypt');
 
-// Load environment variables
 dotenv.config();
-
-// Initialize app
 const app = express();
 const port = process.env.PORT || 8080;
 
@@ -30,18 +28,15 @@ const userSchema = new mongoose.Schema({
   username: String,
   password: String
 });
-
 const User = mongoose.model('User', userSchema);
 
 // ROUTES
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'register.html'));
 });
-
 app.get('/login', (req, res) => {
   res.sendFile(path.join(__dirname, 'login.html'));
 });
-
 app.get('/dashboard', (req, res) => {
   res.sendFile(path.join(__dirname, 'dashboard.html'));
 });
@@ -54,7 +49,8 @@ app.post('/register', async (req, res) => {
   const userExists = await User.findOne({ username });
   if (userExists) return res.status(409).send("Utilisateur existant");
 
-  const newUser = new User({ username, password });
+  const hashedPassword = await bcrypt.hash(password, 10);
+  const newUser = new User({ username, password: hashedPassword });
   await newUser.save();
   res.status(201).send("Utilisateur enregistré");
 });
@@ -62,11 +58,12 @@ app.post('/register', async (req, res) => {
 // CONNEXION
 app.post('/login', async (req, res) => {
   const { username, password } = req.body;
-  const user = await User.findOne({ username, password });
+  const user = await User.findOne({ username });
 
-  if (!user) {
-    return res.status(401).send("Identifiants invalides");
-  }
+  if (!user) return res.status(401).send("Identifiants invalides");
+
+  const isMatch = await bcrypt.compare(password, user.password);
+  if (!isMatch) return res.status(401).send("Identifiants invalides");
 
   res.redirect('/dashboard');
 });
@@ -74,14 +71,4 @@ app.post('/login', async (req, res) => {
 // LANCEMENT DU SERVEUR
 app.listen(port, () => {
   console.log(`🚀 Serveur actif sur http://localhost:${port}`);
-});
-
-app.post('/login', async (req, res) => {
-  const { username, password } = req.body;
-  const user = await User.findOne({ username });
-  if (user && await bcrypt.compare(password, user.password)) {
-    res.redirect('/dashboard.html'); // ✅ Redirection après succès
-  } else {
-    res.status(401).send('Identifiants invalides');
-  }
 });
