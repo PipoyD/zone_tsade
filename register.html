@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Zone TSADE - Création de Profil</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="background"></div>
+  <div class="background-overlay"></div>
+  <div class="card">
+    <div class="top-bar">
+      <div class="progress">
+        <div class="step1-bar active"></div>
+        <div class="step2-bar"></div>
+      </div>
+    </div>
+
+    <div class="container">
+      <!-- Étape 1 -->
+      <div class="step step1 active">
+        <h1>Configurer votre profil</h1>
+        <p class="subtitle">Veuillez renseigner votre identité complète ainsi que votre futur identifiant de connexion.</p>
+        <div class="profile-pic">
+          <div class="avatar">
+            <img id="preview" src="" alt="avatar">
+            <span class="placeholder">👤</span>
+            <input type="file" id="upload-photo" accept="image/*" hidden>
+            <div class="upload-btn" onclick="document.getElementById('upload-photo').click()">+</div>
+          </div>
+        </div>
+        <form id="form-step1">
+          <input type="text" placeholder="Nom complet" required>
+          <input type="text" placeholder="Identifiant" required>
+          <div class="actions">
+            <button type="button" class="btn continue" onclick="goToStep2()">Étape suivante</button>
+            <button type="button" class="btn back" onclick="window.location.href='login.html'">Connexion</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Étape 2 -->
+      <div class="step step2">
+        <h1>Finalisation du profil</h1>
+        <p class="subtitle">Saisissez votre mot de passe et choisissez votre département.</p>
+        <form action="#" method="post">
+          <div class="password-wrapper">
+            <input type="password" placeholder="Mot de passe" id="password" required>
+            <button type="button" class="toggle-password" onclick="togglePassword()">👁️</button>
+          </div>
+          <div class="custom-select-wrapper">
+            <div class="custom-select-trigger">Choisissez votre département</div>
+            <div class="custom-options">
+              <span class="custom-option">Branche Scientifique</span>
+              <span class="custom-option">Agent d'Intervention Tactique</span>
+              <span class="custom-option">Force d'Intervention Mobile</span>
+              <span class="custom-option">Administration de la Zone</span>
+            </div>
+            <input type="hidden" name="departement" id="departement" required>
+          </div>
+          <div class="actions">
+            <button type="button" class="btn back" onclick="goToStep1()">Retour</button>
+            <button type="submit" class="btn continue">Soumettre la demande</button>
+          </div>
+        </form>
+        <p class="admin-note">L’accès sera accordé après validation manuelle par un membre de l’EZ.</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Effet visuel du background
+    let targetX = 50, targetY = 50, currentX = 50, currentY = 50;
+    document.addEventListener("mousemove", function(e) {
+      targetX = 50 + (e.clientX / window.innerWidth - 0.5) * 20;
+      targetY = 50 + (e.clientY / window.innerHeight - 0.5) * 10;
+    });
+    function animateBackground() {
+      currentX += (targetX - currentX) * 0.05;
+      currentY += (targetY - currentY) * 0.05;
+      document.body.style.backgroundPosition = `${currentX}% ${currentY}%`;
+      requestAnimationFrame(animateBackground);
+    }
+    animateBackground();
+
+    // Navigation étapes
+    function goToStep2() {
+      const form = document.querySelector('#form-step1');
+      const inputs = form.querySelectorAll('input[type="text"]');
+      let allValid = true;
+
+      inputs.forEach(input => {
+        if (!input.value.trim()) {
+          input.classList.add('invalid');
+          allValid = false;
+          setTimeout(() => input.classList.remove('invalid'), 1500);
+          input.addEventListener('focus', () => input.classList.remove('invalid'), { once: true });
+        }
+      });
+
+      if (!allValid) return;
+
+      document.querySelector('.step1').classList.remove('active');
+      document.querySelector('.step2').classList.add('active');
+      document.querySelector('.step1-bar').classList.remove('active');
+      document.querySelector('.step2-bar').classList.add('active');
+    }
+
+    function goToStep1() {
+      document.querySelector('.step2').classList.remove('active');
+      document.querySelector('.step1').classList.add('active');
+      document.querySelector('.step2-bar').classList.remove('active');
+      document.querySelector('.step1-bar').classList.add('active');
+    }
+
+    // Affichage/Masquage mot de passe
+    function togglePassword() {
+      const input = document.getElementById("password");
+      input.type = input.type === "password" ? "text" : "password";
+    }
+
+    // Select personnalisé
+    const trigger = document.querySelector(".custom-select-trigger");
+    const options = document.querySelector(".custom-options");
+    const allOptions = document.querySelectorAll(".custom-option");
+    const hiddenInput = document.querySelector("#departement");
+
+    trigger.addEventListener("click", () => {
+      options.classList.toggle("open");
+      trigger.classList.toggle("active");
+    });
+
+    allOptions.forEach(option => {
+      option.addEventListener("click", () => {
+        trigger.textContent = option.textContent;
+        hiddenInput.value = option.textContent;
+        options.classList.remove("open");
+        trigger.classList.remove("active");
+      });
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!document.querySelector(".custom-select-wrapper").contains(e.target)) {
+        options.classList.remove("open");
+        trigger.classList.remove("active");
+      }
+    });
+
+    // Avatar preview
+    const fileInput = document.getElementById("upload-photo");
+    const previewImg = document.getElementById("preview");
+    const placeholder = document.querySelector(".placeholder");
+
+    fileInput.addEventListener("change", function () {
+      const file = this.files[0];
+      if (file && file.type.startsWith("image/")) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          previewImg.src = e.target.result;
+          previewImg.style.display = "block";
+          placeholder.style.display = "none";
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+  </script>
+</body>
+</html>
