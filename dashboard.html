@@ -6,124 +6,177 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css">
   <style>
-    /* Conteneur principal */
-    .dashboard-container {
-      max-width: 900px;
-      width: 100%;
-      margin: 2rem auto;
-      color: #fafafa;
-    }
+    body { display: flex; min-height: 100vh; }
 
-    /* Entête du dashboard */
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 2rem;
-    }
-    header h1 {
-      font-size: 1.8rem;
-    }
-    header .btn {
-      margin: 0 0.5rem;
-    }
-
-    /* Sections */
-    .section {
+    /* Sidebar */
+    .sidebar {
+      width: 60px;
       background: rgba(20,20,20,0.6);
       backdrop-filter: blur(8px);
-      border-radius: 12px;
-      padding: 1.5rem;
-      margin-bottom: 1.5rem;
+      display: flex; flex-direction: column;
+      align-items: center; padding: 1rem 0;
+      gap: 1.5rem;
     }
-
-    .section h2 {
-      margin-bottom: 1rem;
+    .sidebar button {
+      background: none; border: none;
+      color: #ccc; font-size: 1.5rem;
+      cursor: pointer;
     }
+    .sidebar button:hover { color: #fff; }
 
-    /* Missions en cours */
-    .missions-list {
+    /* Header + Content */
+    .main {
+      flex: 1; display: flex; flex-direction: column;
+      background: transparent;
+    }
+    .header {
+      display: flex; justify-content: space-between;
+      align-items: center; padding: 1rem;
+    }
+    .search-bar {
+      flex: 1;
+      max-width: 400px;
+      position: relative;
+    }
+    .search-bar input {
+      width: 100%;
+      padding: 0.5rem 2rem 0.5rem 1rem;
+      border-radius: 999px;
+      border: 1px solid #444;
+      background: rgba(40,40,40,0.9);
+      color: #eee;
+    }
+    .search-bar::after {
+      content: '🔍';
+      position: absolute;
+      right: 1rem;
+      top: 50%; transform: translateY(-50%);
+      color: #888;
+    }
+    .header .actions {
       display: flex;
-      flex-direction: column;
+      align-items: center;
       gap: 1rem;
     }
-    .mission-item {
-      background: rgba(40,40,40,0.8);
-      padding: 0.8rem 1rem;
-      border-radius: 8px;
-      display: flex;
+    .header .actions button {
+      padding: 0.5rem 1rem;
+      border: none; border-radius: 999px;
+      font-weight: bold; cursor: pointer;
+    }
+    .submit-report {
+      background: #c53030; color: #fff;
+    }
+    .profile {
+      display: flex; align-items: center; gap: 0.5rem;
+      color: #ccc;
+    }
+
+    /* Dashboard grid */
+    .content {
+      flex: 1; display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 1rem; padding: 0 1rem 1rem;
+    }
+
+    .card-section {
+      background: rgba(20,20,20,0.55);
+      backdrop-filter: blur(8px);
+      border-radius: 12px;
+      padding: 1rem;
+      color: #fff;
+    }
+    .card-section h2 {
+      margin-bottom: 0.5rem;
+    }
+
+    /* Missions list */
+    .missions-list ul {
+      list-style: none;
+      padding: 0;
+    }
+    .missions-list li {
+      display: flex; align-items: center;
       justify-content: space-between;
-      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+    .missions-list li:last-child { margin-bottom: 0; }
+
+    /* Events list */
+    .events-list ul {
+      list-style: none;
+      padding: 0;
+    }
+    .events-list li {
+      display: flex; justify-content: space-between;
+      margin-bottom: 0.75rem;
     }
 
-    /* Graphique simplifié placeholder */
-    .chart-placeholder {
-      height: 150px;
-      background: rgba(40,40,40,0.8);
+    /* Graph placeholder */
+    .graph-placeholder {
+      width: 100%; height: 150px;
+      background: rgba(40,40,40,0.6);
       border-radius: 8px;
-      margin-top: 1rem;
-    }
-
-    /* Actions globales */
-    .actions {
-      display: flex;
-      gap: 0.5rem;
-    }
-
-    .actions .btn {
-      flex: 1;
+      display: flex; align-items: center; justify-content: center;
+      color: #888;
     }
   </style>
 </head>
 <body>
-  <div class="background"></div>
-  <div class="background-overlay"></div>
+  <nav class="sidebar">
+    <button title="Accueil">🏠</button>
+    <button title="Rapports">📄</button>
+    <button title="Utilisateurs">👥</button>
+    <button title="Sécurité">🛡️</button>
+  </nav>
 
-  <div class="card dashboard-container">
-    <header>
-      <h1>Dashboard</h1>
+  <div class="main">
+    <header class="header">
+      <div class="search-bar">
+        <input type="text" placeholder="Search SCPs, agents, incidents…">
+      </div>
       <div class="actions">
-        <button class="btn continue" onclick="location.href='/demandes'">Voir les demandes</button>
-        <button class="btn back" onclick="location.href='/logout'">Déconnexion</button>
+        <button class="submit-report">Submit report</button>
+        <div class="profile">
+          <img src="avatar.png" width="32" height="32" alt="Profil" style="border-radius:50%;">
+          <span>Welcome, Officer</span>
+        </div>
       </div>
     </header>
 
-    <div class="section">
-      <h2>🔍 Missions en cours</h2>
-      <div class="missions-list">
-        <div class="mission-item">
-          <span>🛡️ Agent Dupont — Patrouille secteur 5</span>
-          <button class="btn continue">Voir détails</button>
-        </div>
-        <div class="mission-item">
-          <span>🚨 Agent Martin — Contrôle accès zone C</span>
-          <button class="btn continue">Voir détails</button>
-        </div>
-        <button class="btn continue" style="width: fit-content; margin-top: .5rem;">Voir toutes les missions</button>
-      </div>
-    </div>
+    <div class="content">
+      <section class="card-section missions-list">
+        <h2>Active Missions</h2>
+        <ul>
+          <li><span>Officer Smith</span><span>Recon mission — Due today</span></li>
+          <li><span>Agent Johnson</span><span>Containment breach — Due tomorrow</span></li>
+          <li><span>Officer Lee</span><span>Report review — Due today</span></li>
+        </ul>
+        <button class="btn continue">View all missions</button>
+      </section>
 
-    <div class="section">
-      <h2>📊 Statistiques heures opération</h2>
-      <div class="chart-placeholder">[Graphique ici]</div>
+      <div>
+        <section class="card-section">
+          <h2>Current Operations</h2>
+          <div class="graph-placeholder">Graph here</div>
+        </section>
+
+        <section class="card-section events-list" style="margin-top:1rem;">
+          <h2>Upcoming events</h2>
+          <ul>
+            <li><span>2 – SCP briefing</span><span>10:00‑10:30</span></li>
+            <li><span>5 – Security drill</span><span>14:00‑15:00</span></li>
+            <li><span>8 – Review Session</span><span>11:00‑12:30</span></li>
+            <li><span>1 – Team Briefing</span><span>09:00‑10:00</span></li>
+            <li><span>9 – Weekly debriefing</span><span>15:00‑16:30</span></li>
+          </ul>
+          <button class="btn continue">View full schedule</button>
+        </section>
+      </div>
     </div>
   </div>
 
   <script>
-    // même fond animé que les autres pages
-    let targetX = 50, targetY = 50, currentX = 50, currentY = 50;
-    const bg = document.querySelector('.background');
-    document.addEventListener("mousemove", e => {
-      targetX = 50 + (e.clientX / window.innerWidth - 0.5) * 10;
-      targetY = 50 + (e.clientY / window.innerHeight - 0.5) * 5;
-    });
-    function animateBackground() {
-      currentX += (targetX - currentX) * 0.05;
-      currentY += (targetY - currentY) * 0.05;
-      bg.style.backgroundPosition = `${currentX}% ${currentY}%`;
-      requestAnimationFrame(animateBackground);
-    }
-    animateBackground();
+    // (Optionnel) Interactions JS peuvent être ajoutées ici
   </script>
 </body>
 </html>
