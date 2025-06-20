@@ -64,8 +64,8 @@ app.post('/register', async (req, res) => {
   const demandeExistante = await Demande.findOne({ username });
   if (demandeExistante) return res.status(409).send("Demande déjà soumise");
 
-  await new Demande({ fullname, username, password, departement, photo }).save();
-  res.status(201).send("Demande envoyée");
+  const newDemande = await new Demande({ fullname, username, password, departement, photo }).save();
+  res.redirect(`/confirmation.html?id=${newDemande._id}`);
 });
 
 // CONNEXION
