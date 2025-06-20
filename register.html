@@ -1,31 +1,10 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <link rel="preload" as="image" href="fond_site.png">
   <meta charset="UTF-8">
   <title>Zone TSADE - Création de Profil</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css">
-  <style>
-    .page-enter {
-      opacity: 0;
-      transform: translateY(30px);
-    }
-    .page-enter-active {
-      opacity: 1;
-      transform: translateY(0);
-      transition: opacity 0.4s ease, transform 0.4s ease;
-    }
-    .page-exit {
-      opacity: 1;
-      transform: translateY(0);
-    }
-    .page-exit-active {
-      opacity: 0;
-      transform: translateY(-30px);
-      transition: opacity 0.4s ease, transform 0.4s ease;
-    }
-  </style>
 </head>
 <body>
   <div class="background" id="animated-background"></div>
@@ -53,8 +32,14 @@
           </div>
         </div>
         <form id="form-step1">
-          <input type="text" placeholder="Nom complet" required minlength="5">
-          <input type="text" placeholder="Identifiant" required minlength="8">
+          <div class="input-group">
+            <input type="text" id="fullname" placeholder="Nom complet" required>
+            <small id="fullname-error" class="error-text"></small>
+          </div>
+          <div class="input-group">
+            <input type="text" id="username" placeholder="Identifiant" required>
+            <small id="username-error" class="error-text"></small>
+          </div>
           <div class="actions">
             <button type="button" class="btn continue" onclick="goToStep2()">Étape suivante</button>
             <button type="button" class="btn back" onclick="transitionTo('login.html')">Connexion</button>
@@ -66,9 +51,9 @@
       <div class="step step2">
         <h1>Finalisation du profil</h1>
         <p class="subtitle">Saisissez votre mot de passe et choisissez votre département.</p>
-        <form action="#" method="post">
+        <form action="/register" method="post">
           <div class="password-wrapper">
-            <input type="password" placeholder="Mot de passe" id="password" required minlength="8">
+            <input type="password" name="password" id="password" placeholder="Mot de passe" required>
             <button type="button" class="toggle-password" onclick="togglePassword()">👁️</button>
           </div>
           <div class="custom-select-wrapper">
@@ -92,56 +77,37 @@
   </div>
 
   <script>
-    // Fond dynamique
-    let targetX = 50, targetY = 50, currentX = 50, currentY = 50;
-    document.addEventListener("mousemove", function(e) {
-      targetX = 50 + (e.clientX / window.innerWidth - 0.5) * 20;
-      targetY = 50 + (e.clientY / window.innerHeight - 0.5) * 5;
-    });
-    function animateBackground() {
-      currentX += (targetX - currentX) * 0.05;
-      currentY += (targetY - currentY) * 0.05;
-      document.getElementById("animated-background").style.backgroundPosition = `${currentX}% ${currentY}%`;
-      requestAnimationFrame(animateBackground);
-    }
-    animateBackground();
-
-    // Transition
-    document.addEventListener("DOMContentLoaded", () => {
-      const card = document.querySelector(".card");
-      card.classList.add("page-enter");
-      requestAnimationFrame(() => {
-        card.classList.add("page-enter-active");
-      });
-    });
-
-    function transitionTo(url) {
-      const card = document.querySelector(".card");
-      card.classList.remove("page-enter", "page-enter-active");
-      card.classList.add("page-exit");
-      requestAnimationFrame(() => {
-        card.classList.add("page-exit-active");
-      });
-      setTimeout(() => {
-        window.location.href = url;
-      }, 400);
-    }
-
     function goToStep2() {
-      const form = document.querySelector('#form-step1');
-      const inputs = form.querySelectorAll('input[type="text"]');
-      let allValid = true;
+      const fullname = document.getElementById('fullname');
+      const username = document.getElementById('username');
+      const fullErr = document.getElementById('fullname-error');
+      const userErr = document.getElementById('username-error');
+      let valid = true;
 
-      inputs.forEach(input => {
-        if (!input.value.trim() || input.value.length < 8) {
-          input.classList.add('invalid');
-          allValid = false;
-          setTimeout(() => input.classList.remove('invalid'), 1500);
-          input.addEventListener('focus', () => input.classList.remove('invalid'), { once: true });
-        }
-      });
+      // Reset
+      fullErr.textContent = '';
+      userErr.textContent = '';
+      fullErr.classList.remove('visible');
+      userErr.classList.remove('visible');
+      fullname.classList.remove('invalid');
+      username.classList.remove('invalid');
 
-      if (!allValid) return;
+      if (fullname.value.trim().length < 5) {
+        fullErr.textContent = "Le nom doit contenir au moins 5 caractères.";
+        fullErr.classList.add('visible');
+        fullname.classList.add('invalid');
+        valid = false;
+      }
+
+      const usernameRegex = /^[a-z0-9]{8,}$/;
+      if (!usernameRegex.test(username.value.trim())) {
+        userErr.textContent = "8 caractères min. uniquement lettres minuscules et chiffres.";
+        userErr.classList.add('visible');
+        username.classList.add('invalid');
+        valid = false;
+      }
+
+      if (!valid) return;
 
       document.querySelector('.step1').classList.remove('active');
       document.querySelector('.step2').classList.add('active');
@@ -161,38 +127,23 @@
       input.type = input.type === "password" ? "text" : "password";
     }
 
-    // Custom select
-    const trigger = document.querySelector(".custom-select-trigger");
-    const options = document.querySelector(".custom-options");
-    const allOptions = document.querySelectorAll(".custom-option");
-    const hiddenInput = document.querySelector("#departement");
-
-    trigger.addEventListener("click", () => {
-      options.classList.toggle("open");
-      trigger.classList.toggle("active");
-    });
-
-    allOptions.forEach(option => {
-      option.addEventListener("click", () => {
-        trigger.textContent = option.textContent;
-        hiddenInput.value = option.textContent;
-        options.classList.remove("open");
-        trigger.classList.remove("active");
+    function transitionTo(url) {
+      const card = document.querySelector(".card");
+      card.classList.remove("page-enter", "page-enter-active");
+      card.classList.add("page-exit");
+      requestAnimationFrame(() => {
+        card.classList.add("page-exit-active");
       });
+      setTimeout(() => { window.location.href = url; }, 400);
+    }
+
+    document.getElementById("username").addEventListener("input", function () {
+      this.value = this.value.replace(/[^a-z0-9]/g, '');
     });
 
-    document.addEventListener("click", (e) => {
-      if (!document.querySelector(".custom-select-wrapper").contains(e.target)) {
-        options.classList.remove("open");
-        trigger.classList.remove("active");
-      }
-    });
-
-    // Avatar preview
     const fileInput = document.getElementById("upload-photo");
     const previewImg = document.getElementById("preview");
     const placeholder = document.querySelector(".placeholder");
-
     fileInput.addEventListener("change", function () {
       const file = this.files[0];
       if (file && file.type.startsWith("image/")) {
@@ -205,6 +156,20 @@
         reader.readAsDataURL(file);
       }
     });
+
+    // Fond animé
+    let targetX = 50, targetY = 50, currentX = 50, currentY = 50;
+    document.addEventListener("mousemove", function(e) {
+      targetX = 50 + (e.clientX / window.innerWidth - 0.5) * 20;
+      targetY = 50 + (e.clientY / window.innerHeight - 0.5) * 5;
+    });
+    function animateBackground() {
+      currentX += (targetX - currentX) * 0.05;
+      currentY += (targetY - currentY) * 0.05;
+      document.getElementById("animated-background").style.backgroundPosition = `${currentX}% ${currentY}%`;
+      requestAnimationFrame(animateBackground);
+    }
+    animateBackground();
   </script>
 </body>
 </html>
