@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Confirmation</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="card">
+    <h1>✅ Demande enregistrée</h1>
+    <p id="message">Votre demande a bien été soumise.</p>
+    <button onclick="location.href='/login'" class="btn continue">Retour à la connexion</button>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('id');
+    if (id) {
+      document.getElementById('message').innerText = `Votre demande a bien été soumise. Numéro de demande : #${id}`;
+    }
+  </script>
+</body>
+</html>
