@@ -27,43 +27,51 @@ mongoose.connect(process.env.MONGODB_URI, {
 }).then(() => console.log("✅ Connecté à MongoDB"))
   .catch((err) => console.error("❌ Erreur de connexion MongoDB:", err));
 
-// MODELE UTILISATEUR
+// MODELES
 const userSchema = new mongoose.Schema({
   username: String,
   password: String
 });
+const demandeSchema = new mongoose.Schema({
+  fullname: String,
+  username: String,
+  password: String,
+  departement: String,
+  photo: String,
+  status: { type: String, default: "en_attente" }
+});
 const User = mongoose.model('User', userSchema);
+const Demande = mongoose.model('Demande', demandeSchema);
 
 // ROUTES
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'register.html')));
 app.get('/login', (req, res) => res.sendFile(path.join(__dirname, 'login.html')));
-
-// DASHBOARD avec vérification de session
 app.get('/dashboard', (req, res) => {
   if (!req.session.user) return res.redirect('/login');
   res.sendFile(path.join(__dirname, 'dashboard.html'));
 });
+app.get('/demandes', (req, res) => {
+  if (!req.session.user) return res.redirect('/login');
+  res.sendFile(path.join(__dirname, 'demandes.html'));
+});
 
-// ENREGISTREMENT
+// ENREGISTREMENT => Crée une demande
 app.post('/register', async (req, res) => {
-  const { username, password } = req.body;
-  if (!username || username.length < 8 || !password || password.length < 8)
-    return res.status(400).send("Identifiants invalides");
+  const { fullname, username, password, departement, photo } = req.body;
+  if (!username || username.length < 8 || !password || password.length < 8 || !fullname || fullname.length < 5)
+    return res.status(400).send("Champs invalides");
 
-  const userExists = await User.findOne({ username });
-  if (userExists) return res.status(409).send("Utilisateur existant");
+  const demandeExistante = await Demande.findOne({ username });
+  if (demandeExistante) return res.status(409).send("Demande déjà soumise");
 
-  const hashedPassword = await bcrypt.hash(password, 10);
-  const newUser = new User({ username, password: hashedPassword });
-  await newUser.save();
-  res.status(201).send("Utilisateur enregistré");
+  await new Demande({ fullname, username, password, departement, photo }).save();
+  res.status(201).send("Demande envoyée");
 });
 
 // CONNEXION
 app.post('/login', async (req, res) => {
   const { username, password } = req.body;
   const user = await User.findOne({ username });
-
   if (!user || !(await bcrypt.compare(password, user.password)))
     return res.status(401).send("Identifiants invalides");
 
@@ -82,7 +90,6 @@ app.get('/setup', async (req, res) => {
   if (exists) return res.redirect('/login');
   res.sendFile(path.join(__dirname, 'setup.html'));
 });
-
 app.post('/setup', async (req, res) => {
   const { username, password } = req.body;
   const exists = await User.findOne({});
@@ -91,6 +98,27 @@ app.post('/setup', async (req, res) => {
   const hashedPassword = await bcrypt.hash(password, 10);
   await new User({ username, password: hashedPassword }).save();
   res.redirect('/login.html');
+});
+
+// API DEMANDES
+app.get('/api/demandes', async (req, res) => {
+  const demandes = await Demande.find({ status: "en_attente" });
+  res.json(demandes);
+});
+
+app.post('/api/demandes/:id/accepter', async (req, res) => {
+  const d = await Demande.findById(req.params.id);
+  if (!d) return res.status(404).send("Introuvable");
+  const hashed = await bcrypt.hash(d.password, 10);
+  await new User({ username: d.username, password: hashed }).save();
+  d.status = "acceptee";
+  await d.save();
+  res.sendStatus(200);
+});
+
+app.post('/api/demandes/:id/refuser', async (req, res) => {
+  await Demande.findByIdAndUpdate(req.params.id, { status: "refusee" });
+  res.sendStatus(200);
 });
 
 // LANCEMENT SERVEUR
