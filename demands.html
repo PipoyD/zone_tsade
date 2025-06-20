@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Demandes - Zone TSADE</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="card">
+    <h1>Demandes en attente</h1>
+    <ul id="list"></ul>
+  </div>
+
+  <template id="tpl">
+    <li class="demande-item">
+      <span class="titre">Demande #<span class="id"></span> – <span class="username"></span></span>
+      <button class="btn view">Voir</button>
+      <button class="btn accept">✔️</button>
+      <button class="btn refuse">❌</button>
+    </li>
+  </template>
+
+  <div id="modal" class="modal hidden">
+    <div class="modal-content">
+      <h2>Détails de la demande</h2>
+      <img id="photo" alt="Photo" />
+      <p><strong>Nom :</strong> <span id="fullname"></span></p>
+      <p><strong>Identifiant :</strong> <span id="uname"></span></p>
+      <p><strong>Département :</strong> <span id="dept"></span></p>
+      <button id="close">Fermer</button>
+    </div>
+  </div>
+
+  <script>
+    async function load() {
+      const list = document.getElementById('list');
+      const tpl = document.getElementById('tpl');
+      const resp = await fetch('/api/demandes');
+      const arr = await resp.json();
+      list.innerHTML = '';
+      arr.forEach(d => {
+        const li = tpl.content.cloneNode(true);
+        li.querySelector('.id').textContent = d._id;
+        li.querySelector('.username').textContent = d.username;
+        li.querySelector('.view').onclick = () => show(d);
+        li.querySelector('.accept').onclick = () => action(d._id, 'accepter', li);
+        li.querySelector('.refuse').onclick = () => action(d._id, 'refuser', li);
+        list.append(li);
+      });
+    }
+
+    function show(d) {
+      document.getElementById('fullname').textContent = d.fullname;
+      document.getElementById('uname').textContent = d.username;
+      document.getElementById('dept').textContent = d.departement;
+      const img = document.getElementById('photo');
+      img.src = d.photo || '';
+      img.style.display = d.photo ? 'block' : 'none';
+      document.getElementById('modal').classList.remove('hidden');
+    }
+    document.getElementById('close').onclick = () => document.getElementById('modal').classList.add('hidden');
+
+    async function action(id, type, li) {
+      await fetch(`/api/demandes/${id}/${type}`, { method: 'POST' });
+      li.remove();
+    }
+
+    window.onload = load;
+  </script>
+</body>
+</html>
